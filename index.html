@@ -1,14 +1,50 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>Test</title></head>
-<body style="font-family:sans-serif;padding:20px;font-size:20px">
-<div id="out">Загрузка...</div>
-<script>
-  try {
-    document.getElementById('out').textContent = '✅ JavaScript РАБОТАЕТ!';
-  } catch(e) {
-    document.getElementById('out').textContent = '❌ Ошибка: ' + e.message;
-  }
-</script>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OS Clicker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">OS CLICKER</div>
+  <div class="loading-text" id="loadingText">Loading...</div>
+  <div class="loading-bar"><div class="loading-bar-fill" id="loadingBarFill"></div></div>
+</div>
+<div id="gameScreen" style="display:none;">
+  <div class="top-bar">
+    <button class="icon-btn" id="settingsBtn">⚙️</button>
+    <button class="icon-btn" id="langBtn">🇬🇧 EN</button>
+  </div>
+  <h1 id="gameTitle">OS CLICKER</h1>
+  <div class="ver" id="ver"></div>
+  <div class="coins" id="coins">0 ⚡</div>
+  <div class="stats" id="stats"></div>
+  <div class="pc-box" id="pcBox"></div>
+  <div class="shop" id="shop"></div>
+  <button class="ach-btn" id="achBtn">🏆 Achievements</button>
+</div>
+<div class="modal-bg" id="settingsModalBg"><div class="modal"><h3 id="settingsTitle">Settings</h3><div id="settingsContent"></div><div class="modal-btns"><button class="modal-close" onclick="closeSettings()" id="settingsCloseBtn">Close</button></div></div></div>
+<div class="modal-bg" id="achModalBg"><div class="modal"><h3 id="achTitle">Achievements</h3><div class="ach-list" id="achList"></div><div class="modal-btns"><button class="modal-close" onclick="closeAch()" id="achCloseBtn">Close</button></div></div></div>
+<div class="modal-bg" id="dataModalBg"><div class="modal"><h3 id="dataModalTitle">Export</h3><textarea id="dataTextarea"></textarea><div class="modal-btns"><button class="modal-close" onclick="closeDataModal()" id="dataCloseBtn">Close</button><button id="dataActionBtn"></button></div></div></div>
+<div class="ach-popup" id="achPopup">
+  <div class="ach-popup-icon" id="achPopupIcon">🏆</div>
+  <div class="ach-popup-content">
+    <div class="ach-popup-name" id="achPopupName"></div>
+    <div class="ach-popup-desc" id="achPopupDesc"></div>
+    <div class="ach-popup-rarity" id="achPopupRarity"></div>
+    <button class="ach-share-btn" id="achShareBtn">Share</button>
+  </div>
+  <div class="ach-popup-close" onclick="hideAchPopup()">✕</div>
+</div>
+<div class="notification" id="notification"></div>
+<div class="easter-overlay" id="easterOverlay">
+  <button class="easter-close" onclick="closeEaster()">✕</button>
+  <div class="easter-text">SPITZ-STUDIO IS WATCHING YOU</div>
+  <div class="easter-sub">YOU SHOULDN'T BE HERE</div>
+  <button class="easter-reset" id="easterReset">RESET PROGRESS</button>
+</div>
+<script src="script.js"></script>
 </body>
 </html>
