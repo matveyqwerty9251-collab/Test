@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1">
+<title>OS Clicker</title>
+<style>
+:root{--bg:#ffffff;--text:#000000;--card:#f5f5f5;--border:#dddddd;--accent:#7c3aed;--accent-text:#ffffff;--success:#16a34a;--shadow:rgba(124,58,237,0.15)}
+[data-theme="dark"]{--bg:#0a0a14;--text:#ffffff;--card:#15152a;--border:#2a2a4a;--accent:#a855f7;--accent-text:#ffffff;--success:#22c55e;--shadow:rgba(168,85,247,0.3)}
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;overflow-x:hidden}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:8px;padding-bottom:30px;transition:background .3s,color .3s;touch-action:manipulation}
+.loading-screen{position:fixed;inset:0;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
+.loading-logo{font-size:24px;font-weight:800;color:var(--accent);letter-spacing:3px;margin-bottom:16px}
+.loading-text{font-size:13px;margin-bottom:16px;opacity:.7}
+.loading-bar{width:60%;max-width:280px;height:6px;background:var(--card);border-radius:3px;overflow:hidden;border:1px solid var(--border)}
+.loading-bar-fill{height:100%;width:0%;background:var(--accent);transition:width .2s linear}
+.top-bar{width:100%;max-width:520px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px}
+.icon-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+.icon-btn:active{background:var(--accent);color:var(--accent-text)}
+h1{font-size:16px;color:var(--accent);letter-spacing:2px;margin-bottom:2px;text-align:center;cursor:pointer}
+.ver{font-size:11px;opacity:.6;margin-bottom:4px;text-align:center}
+.coins{font-size:clamp(18px,6vw,28px);font-weight:700;margin:2px 0;text-align:center;max-width:100%;overflow:hidden;white-space:nowrap}
+.coins small{font-size:.5em;color:var(--accent)}
+.stats{font-size:11px;color:var(--success);margin-bottom:6px;text-align:center;padding:0 8px}
+.pc-box{width:110px;height:110px;display:flex;align-items:center;justify-content:center;margin:6px 0;filter:drop-shadow(0 0 12px var(--shadow));transition:transform .08s;cursor:pointer}
+.pc-box:active{transform:scale(0.92)}
+.pc-box svg{width:100%;height:100%}
+.shop{width:100%;max-width:520px}
+.upgrade{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;display:flex;flex-direction:column;gap:5px}
+.upgrade.disabled{opacity:.5}
+.upgrade.maxed{border-color:var(--success)}
+.upgrade.os-up{border-color:var(--accent)}
+.up-row{display:flex;justify-content:space-between;align-items:center}
+.up-info{flex:1;min-width:0}
+.up-name{font-weight:600;font-size:12px}
+.up-count{color:var(--success);font-size:10px;margin-left:3px}
+.up-desc{font-size:10px;opacity:.7;margin-top:1px}
+.up-price{color:var(--accent);font-weight:700;font-size:11px;white-space:nowrap;margin-left:6px}
+.buy-row{display:flex;gap:3px}
+.buy-btn{flex:1;background:var(--border);color:var(--text);border:none;border-radius:6px;padding:7px 2px;font-size:11px;font-weight:700;cursor:pointer}
+.buy-btn:not(:disabled):active{background:var(--accent);color:var(--accent-text)}
+.buy-btn:disabled{opacity:.4;cursor:not-allowed}
+.os-buy{background:var(--accent);color:var(--accent-text);border:none;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+.os-buy:disabled{opacity:.4;cursor:not-allowed}
+.ach-btn{width:100%;max-width:520px;margin-top:8px;padding:12px;background:var(--accent);color:var(--accent-text);border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;max-width:400px;width:100%;max-height:80vh;overflow-y:auto}
+.modal h3{color:var(--accent);font-size:15px;margin-bottom:12px;text-align:center}
+.modal textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:11px;margin-bottom:10px;resize:vertical;font-family:monospace;min-height:100px}
+.setting-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.setting-row:last-child{border-bottom:none}
+.toggle-btn{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;min-width:60px}
+.toggle-btn:active{background:var(--accent);color:var(--accent-text)}
+.modal-btns{display:flex;gap:8px;margin-top:12px}
+.modal-btns button{flex:1;padding:10px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:var(--accent-text)}
+.modal-close{background:var(--border)!important;color:var(--text)!important}
+.ach-list{display:flex;flex-direction:column;gap:6px}
+.ach-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px;display:flex;align-items:center;gap:8px}
+.ach-item.unlocked{border-color:var(--accent)}
+.ach-icon{font-size:20px;width:28px;text-align:center}
+.ach-info{flex:1;min-width:0}
+.ach-name{font-size:12px;font-weight:700}
+.ach-desc{font-size:10px;opacity:.7}
+.ach-rarity{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--border);white-space:nowrap}
+.rarity-Common{background:#16a34a;color:#fff}
+.rarity-Rare{background:#2563eb;color:#fff}
+.rarity-Epic{background:#7c3aed;color:#fff}
+.rarity-Legendary{background:#ea580c;color:#fff}
+.rarity-Mythic{background:#dc2626;color:#fff}
+.ach-popup{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:var(--card);border:2px solid var(--accent);border-radius:12px;padding:12px;display:none;z-index:300;max-width:360px;width:calc(100% - 24px);box-shadow:0 4px 20px var(--shadow)}
+.ach-popup.show{display:flex;gap:10px;align-items:flex-start}
+.ach-popup-icon{font-size:28px}
+.ach-popup-content{flex:1;min-width:0}
+.ach-popup-name{font-size:13px;font-weight:800;color:var(--accent)}
+.ach-popup-desc{font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+.ach-popup-rarity{font-size:9px;font-weight:700;margin-top:4px;opacity:.8}
+.ach-share-btn{background:var(--accent);color:var(--accent-text);border:none;border-radius:6px;padding:6px 10px;font-size:10px;font-weight:700;margin-top:6px;cursor:pointer}
+.ach-popup-close{font-size:16px;cursor:pointer;opacity:.6;padding:0 4px}
+.easter-overlay{position:fixed;inset:0;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:500;padding:20px}
+.easter-overlay.show{display:flex}
+.easter-text{color:#dc2626;font-size:22px;font-weight:800;text-align:center;text-shadow:0 0 12px #dc2626;animation:drip 2s ease-in-out infinite;letter-spacing:1px;line-height:1.3}
+@keyframes drip{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:.6;transform:translateY(8px)}}
+.easter-sub{color:#7a1a1a;font-size:11px;margin-top:20px;text-align:center;letter-spacing:3px}
+.easter-reset{background:#dc2626;color:#fff;border:none;border-radius:12px;padding:14px 28px;font-size:14px;font-weight:800;cursor:pointer;margin-top:36px;letter-spacing:1px}
+.easter-close{position:absolute;top:16px;right:16px;color:#7a1a1a;font-size:24px;cursor:pointer;background:none;border:none}
+.notification{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--accent-text);padding:10px 18px;border-radius:10px;font-size:12px;font-weight:700;display:none;z-index:400;max-width:340px;text-align:center}
+.notification.show{display:block}
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">OS CLICKER</div>
+  <div class="loading-text" id="loadingText">Loading...</div>
+  <div class="loading-bar"><div class="loading-bar-fill" id="loadingBarFill"></div></div>
+</div>
+
+<div id="gameScreen" style="display:none;">
+  <div class="top-bar">
+    <button class="icon-btn" id="settingsBtn">⚙️</button>
+    <button class="icon-btn" id="langBtn">🇬🇧 EN</button>
+  </div>
+  <h1 id="gameTitle">OS CLICKER</h1>
+  <div class="ver" id="ver"></div>
+  <div class="coins" id="coins">0 ⚡</div>
+  <div class="stats" id="stats"></div>
+  <div class="pc-box" id="pcBox"></div>
+  <div class="shop" id="shop"></div>
+  <button class="ach-btn" id="achBtn">🏆 Achievements</button>
+</div>
+
+<div class="modal-bg" id="settingsModalBg">
+  <div class="modal">
+    <h3 id="settingsTitle">Settings</h3>
+    <div id="settingsContent"></div>
+    <div class="modal-btns"><button class="modal-close" onclick="closeSettings()" id="settingsCloseBtn">Close</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="achModalBg">
+  <div class="modal">
+    <h3 id="achTitle">Achievements</h3>
+    <div class="ach-list" id="achList"></div>
+    <div class="modal-btns"><button class="modal-close" onclick="closeAch()" id="achCloseBtn">Close</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="dataModalBg">
+  <div class="modal">
+    <h3 id="dataModalTitle">Export Save</h3>
+    <textarea id="dataTextarea" placeholder="Save string..."></textarea>
+    <div class="modal-btns">
+      <button class="modal-close" onclick="closeDataModal()" id="dataCloseBtn">Close</button>
+      <button id="dataActionBtn"></button>
+    </div>
+  </div>
+</div>
+
+<div class="ach-popup" id="achPopup">
+  <div class="ach-popup-icon" id="achPopupIcon">🏆</div>
+  <div class="ach-popup-content">
+    <div class="ach-popup-name" id="achPopupName"></div>
+    <div class="ach-popup-desc" id="achPopupDesc"></div>
+    <div class="ach-popup-rarity" id="achPopupRarity"></div>
+    <button class="ach-share-btn" id="achShareBtn">Share</button>
+  </div>
+  <div class="ach-popup-close" onclick="hideAchPopup()">✕</div>
+</div>
+
+<div class="notification" id="notification"></div>
+
+<div class="easter-overlay" id="easterOverlay">
+  <button class="easter-close" onclick="closeEaster()">✕</button>
+  <div class="easter-text">SPITZ-STUDIO IS WATCHING YOU</div>
+  <div class="easter-sub">YOU SHOULDN'T BE HERE</div>
+  <button class="easter-reset" id="easterReset">RESET PROGRESS</button>
+</div>
+
+<script>
+// ============ OS LIST ============
+const OS_LIST=[
+{n:"Altair 8800",m:1,t:"terminal",c:"#22c55e",l:"dos"},{n:"Commodore PET",m:2,t:"terminal",c:"#22c55e",l:"dos"},{n:"Apple II",m:3,t:"terminal",c:"#22c55e",l:"apple"},{n:"TRS-80",m:5,t:"terminal",c:"#22c55e",l:"dos"},{n:"Commodore 64",m:7,t:"terminal",c:"#22c55e",l:"dos"},{n:"ZX Spectrum",m:10,t:"terminal",c:"#22c55e",l:"dos"},{n:"Atari 800",m:14,t:"terminal",c:"#22c55e",l:"dos"},{n:"MSX",m:19,t:"terminal",c:"#22c55e",l:"dos"},{n:"MS-DOS 1.0",m:26,t:"terminal",c:"#22c55e",l:"dos"},{n:"MS-DOS 3.3",m:35,t:"terminal",c:"#22c55e",l:"dos"},{n:"MS-DOS 5.0",m:47,t:"terminal",c:"#22c55e",l:"dos"},{n:"MS-DOS 6.22",m:63,t:"terminal",c:"#22c55e",l:"dos"},{n:"PC-DOS 7",m:84,t:"terminal",c:"#22c55e",l:"dos"},{n:"FreeDOS",m:112,t:"terminal",c:"#22c55e",l:"dos"},{n:"Windows 1.0",m:150,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows 2.0",m:200,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows 3.0",m:270,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows 3.1",m:360,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows 95",m:480,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows 98",m:640,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows ME",m:850,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows 2000",m:1130,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows XP",m:1500,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows Vista",m:2000,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows 7",m:2700,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows 8",m:3600,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows 10",m:4800,t:"desktop",c:"#3b82f6",l:"win"},{n:"Windows 11",m:6400,t:"desktop",c:"#3b82f6",l:"win"},{n:"Ubuntu 10.04",m:8600,t:"laptop",c:"#f97316",l:"penguin"},{n:"Ubuntu 20.04",m:11500,t:"laptop",c:"#f97316",l:"penguin"},{n:"Debian",m:15400,t:"laptop",c:"#dc2626",l:"penguin"},{n:"Fedora",m:20600,t:"laptop",c:"#3b82f6",l:"penguin"},{n:"Linux Mint",m:27600,t:"laptop",c:"#22c55e",l:"penguin"},{n:"Manjaro",m:37000,t:"laptop",c:"#22c55e",l:"penguin"},{n:"CentOS",m:49500,t:"laptop",c:"#a855f7",l:"penguin"},{n:"Red Hat",m:66000,t:"laptop",c:"#dc2626",l:"penguin"},{n:"Arch Linux",m:88000,t:"laptop",c:"#38bdf8",l:"penguin"},{n:"Gentoo",m:118000,t:"laptop",c:"#a855f7",l:"penguin"},{n:"Kali Linux",m:158000,t:"laptop",c:"#22c55e",l:"penguin"},{n:"Mac OS 1",m:210000,t:"desktop",c:"#94a3b8",l:"apple"},{n:"Mac OS 9",m:280000,t:"desktop",c:"#94a3b8",l:"apple"},{n:"Mac OS X",m:375000,t:"laptop",c:"#94a3b8",l:"apple"},{n:"macOS Sierra",m:500000,t:"laptop",c:"#94a3b8",l:"apple"},{n:"macOS Ventura",m:670000,t:"laptop",c:"#94a3b8",l:"apple"},{n:"macOS Sonoma",m:900000,t:"laptop",c:"#94a3b8",l:"apple"},{n:"Windows Quantum",m:1200000,t:"holo",c:"#a855f7",l:"win"},{n:"Neural OS",m:1600000,t:"holo",c:"#a855f7",l:"ai"},{n:"Quantum AI",m:2200000,t:"holo",c:"#eab308",l:"ai"},{n:"OS Singularity",m:3000000,t:"holo",c:"#eab308",l:"bolt"},{n:"Skynet Core",m:5000000,t:"holo",c:"#dc2626",l:"ai"}
+];
+
+function getPC(os){
+  const c=os.c,t=os.t,l=os.l;let logo='';
+  if(l==='dos')logo='<text x="50" y="46" fill="'+c+'" font-family="monospace" font-size="7" text-anchor="middle">C:\\&gt;</text>';
+  else if(l==='win')logo='<rect x="40" y="36" width="8" height="8" fill="'+c+'"/><rect x="51" y="36" width="8" height="8" fill="'+c+'"/><rect x="40" y="47" width="8" height="8" fill="'+c+'"/><rect x="51" y="47" width="8" height="8" fill="'+c+'"/>';
+  else if(l==='apple')logo='<path d="M50 34 Q46 30 43 33 Q40 37 42 42 Q40 44 41 50 Q42 58 48 60 Q51 60 53 58 Q56 60 59 58 Q62 56 61 50 Q61 44 58 42 Q60 37 57 33 Q54 30 50 34 Z" fill="'+c+'"/>';
+  else if(l==='penguin')logo='<ellipse cx="50" cy="46" rx="12" ry="14" fill="'+c+'"/><ellipse cx="50" cy="50" rx="7" ry="9" fill="#fff"/><circle cx="46" cy="42" r="1.5" fill="#000"/><circle cx="54" cy="42" r="1.5" fill="#000"/><path d="M46 46 L54 46 L52 49 L48 49 Z" fill="#fbbf24"/>';
+  else if(l==='bolt')logo='<path d="M53 28 L38 48 L47 48 L44 64 L60 44 L51 44 Z" fill="'+c+'"/>';
+  else if(l==='ai')logo='<circle cx="50" cy="46" r="13" fill="none" stroke="'+c+'" stroke-width="2"/><circle cx="50" cy="46" r="4" fill="'+c+'"/><circle cx="50" cy="36" r="1.5" fill="'+c+'"/><circle cx="50" cy="56" r="1.5" fill="'+c+'"/><circle cx="40" cy="46" r="1.5" fill="'+c+'"/><circle cx="60" cy="46" r="1.5" fill="'+c+'"/>';
+  if(t==='terminal')return'<svg viewBox="0 0 100 100"><rect x="10" y="20" width="80" height="55" rx="2" fill="#d0d0d0" stroke="#666" stroke-width="1.5"/><rect x="15" y="25" width="70" height="45" fill="#0a0a0a"/>'+logo+'<rect x="30" y="78" width="40" height="4" rx="2" fill="#666"/><rect x="20" y="83" width="60" height="3" rx="1.5" fill="#444"/></svg>';
+  if(t==='desktop')return'<svg viewBox="0 0 100 100"><rect x="8" y="15" width="60" height="45" rx="2" fill="#d0d0d0" stroke="#666" stroke-width="1.5"/><rect x="12" y="19" width="52" height="37" fill="#0a0a0a"/>'+logo+'<rect x="72" y="15" width="20" height="50" rx="2" fill="#333" stroke="#666"/><circle cx="82" cy="24" r="2" fill="'+c+'"/><rect x="82" y="30" width="6" height="2" fill="#666"/><rect x="82" y="35" width="6" height="2" fill="#666"/><rect x="30" y="62" width="16" height="4" fill="#999"/><rect x="20" y="67" width="36" height="4" rx="2" fill="#666"/><rect x="25" y="74" width="26" height="3" rx="1.5" fill="#444"/></svg>';
+  if(t==='laptop')return'<svg viewBox="0 0 100 100"><rect x="15" y="20" width="70" height="42" rx="2" fill="#d0d0d0" stroke="#666" stroke-width="1.5"/><rect x="19" y="24" width="62" height="34" fill="#0a0a0a"/>'+logo+'<rect x="10" y="64" width="80" height="10" rx="2" fill="#999"/><rect x="42" y="66" width="16" height="2" rx="1" fill="#666"/></svg>';
+  if(t==='phone')return'<svg viewBox="0 0 100 100"><rect x="30" y="10" width="40" height="80" rx="8" fill="#333" stroke="#666" stroke-width="1.5"/><rect x="34" y="18" width="32" height="60" fill="#0a0a0a"/>'+logo+'<circle cx="50" cy="84" r="3" fill="#666"/></svg>';
+  return'<svg viewBox="0 0 100 100"><circle cx="50" cy="45" r="30" fill="none" stroke="'+c+'" stroke-width="1" opacity="0.4"/><circle cx="50" cy="45" r="22" fill="none" stroke="'+c+'" stroke-width="1.5" opacity="0.7"/><circle cx="50" cy="45" r="14" fill="none" stroke="'+c+'" stroke-width="2"/>'+logo+'<ellipse cx="50" cy="82" rx="30" ry="3" fill="'+c+'" opacity="0.4"/></svg>';
+}
+
+// ============ Translations ============
+const T={
+en:{title:"OS CLICKER",click:"Click",perSec:"Per sec",ach:"Achievements",settings:"Settings",sound:"Sound",theme:"Theme",language:"Language",export:"Export Save",import:"Import Save",close:"Close",share:"Share",loading:"Loading...",loadingFirst:"Preparing systems...",on:"ON",off:"OFF",light:"Light",dark:"Dark",max:"MAX",buy1:"x1",buy10:"x10",buy50:"x50",resetProgress:"RESET PROGRESS",shareText:"I got a new achievement",shareText2:"in OS Clicker!",exportCopied:"Save exported and copied!",invalidSave:"Invalid save data!",imported:"Save imported!",confirmReset:"Reset ALL progress? This cannot be undone.",next:"Next OS",current:"Current OS",bonus:"Bonus",upgrade:"Upgrade"},
+ru:{title:"OS КЛИКЕР",click:"Клик",perSec:"В сек",ach:"Ачивки",settings:"Настройки",sound:"Звук",theme:"Тема",language:"Язык",export:"Экспорт",import:"Импорт",close:"Закрыть",share:"Поделиться",loading:"Загрузка...",loadingFirst:"Готовим системы...",on:"ВКЛ",off:"ВЫКЛ",light:"Светлая",dark:"Тёмная",max:"МАКС",buy1:"x1",buy10:"x10",buy50:"x50",resetProgress:"СБРОСИТЬ ПРОГРЕСС",shareText:"Я получил новую очивку",shareText2:"в OS Clicker!",exportCopied:"Сохранение выгружено и скопировано!",invalidSave:"Неверные данные!",imported:"Прогресс загружен!",confirmReset:"Сбросить ВЕСЬ прогресс? Это нельзя отменить.",next:"Следующая ОС",current:"Текущая ОС",bonus:"Бонус",upgrade:"Улучшить"}
+};
+
+// ============ State (объявлен ДО использования) ============
+let state={
+  coins:0,totalEarned:0,clicks:0,titleClicks:0,
+  upgrades:{},osIndex:0,achievements:[],
+  lang:'en',theme:'light',sound:true,
+  themeChanged:false,langChanged:false
+};
+
+function T_(k){return (T[state.lang]&&T[state.lang][k])||k;}
+
+// ============ Upgrades ============
+const ALL_UP=[
+{id:'mouse',n:{en:"Mouse",ru:"Мышь"},d:{en:"+1 to click",ru:"+1 к клику"},b:20,g:1.18,max:100,t:'ca',v:1},
+{id:'auto',n:{en:"Auto Clicker",ru:"Автокликер"},d:{en:"+1 ⚡/sec",ru:"+1 ⚡/сек"},b:30,g:1.20,max:100,t:'aa',v:1},
+{id:'cursor',n:{en:"Gaming Cursor",ru:"Игровой курсор"},d:{en:"+5 to click",ru:"+5 к клику"},b:250,g:1.22,max:100,t:'ca',v:5},
+{id:'bbot',n:{en:"Bronze Bot",ru:"Бронзовый бот"},d:{en:"+10 ⚡/sec",ru:"+10 ⚡/сек"},b:600,g:1.22,max:100,t:'aa',v:10},
+{id:'ram',n:{en:"More RAM",ru:"Больше RAM"},d:{en:"x1.2 to click",ru:"x1.2 к клику"},b:800,g:1.45,max:50,t:'cm',v:1.2},
+{id:'kbd',n:{en:"Keyboard",ru:"Клавиатура"},d:{en:"+30 to click",ru:"+30 к клику"},b:3000,g:1.24,max:100,t:'ca',v:30},
+{id:'cpu',n:{en:"Powerful CPU",ru:"Мощный CPU"},d:{en:"x1.2 to auto",ru:"x1.2 к авто"},b:4000,g:1.45,max:50,t:'am',v:1.2},
+{id:'sbot',n:{en:"Silver Bot",ru:"Серебряный бот"},d:{en:"+150 ⚡/sec",ru:"+150 ⚡/сек"},b:15000,g:1.24,max:100,t:'aa',v:150},
+{id:'gmouse',n:{en:"Gaming Mouse",ru:"Игровая мышь"},d:{en:"+250 to click",ru:"+250 к клику"},b:45000,g:1.26,max:100,t:'ca',v:250},
+{id:'oc',n:{en:"Overclock",ru:"Разгон"},d:{en:"x1.5 to click",ru:"x1.5 к клику"},b:100000,g:1.55,max:30,t:'cm',v:1.5},
+{id:'gpu',n:{en:"GPU",ru:"Видеокарта"},d:{en:"x1.5 to auto",ru:"x1.5 к авто"},b:200000,g:1.55,max:30,t:'am',v:1.5},
+{id:'gbot',n:{en:"Gold Bot",ru:"Золотой бот"},d:{en:"+2K ⚡/sec
